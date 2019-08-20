@@ -1,4 +1,3 @@
-variable "provider_alias" {}
 variable "domain_names" {
   type = list(string)
 }
