@@ -14,7 +14,6 @@ Provision an AWS certificate.
 module "certificate" {
   source = "realglobe-Inc/acm-certificate/aws"
   version = "1.0.0"
-  provider_alias = "aws"
   domain_names = ["example.com"]
   route53_zone_id = "xxxxxxx"
   acm_cert_tag_name = "example.com"
