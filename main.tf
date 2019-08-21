@@ -13,6 +13,12 @@ resource "aws_acm_certificate" "cert" {
 
   lifecycle {
     create_before_destroy = true
+    # SAN に複数のドメインを指定するとランダムな順序で並べ替えてリソースが作成されるため、apply するたびに再作成になる
+    # 一時的な解決策として ignore_changes を使用する
+    # See https://github.com/terraform-providers/terraform-provider-aws/issues/8531
+    ignore_changes = [
+      subject_alternative_names,
+    ]
   }
 }
 
