@@ -23,12 +23,13 @@ resource "aws_acm_certificate" "cert" {
 }
 
 resource "aws_acm_certificate_validation" "cert" {
+  count = var.validate_certificate ? 1 : 0
   certificate_arn         = aws_acm_certificate.cert.arn
   validation_record_fqdns = aws_route53_record.cert_validation.*.fqdn
 }
 
 resource "aws_route53_record" "cert_validation" {
-  count   = length(var.domain_names)
+  count   = var.validate_certificate ? length(var.domain_names) : 0
   name    = lookup(aws_acm_certificate.cert.domain_validation_options[count.index], "resource_record_name")
   type    = lookup(aws_acm_certificate.cert.domain_validation_options[count.index], "resource_record_type")
   records = [lookup(aws_acm_certificate.cert.domain_validation_options[count.index], "resource_record_value")]
@@ -38,4 +39,6 @@ resource "aws_route53_record" "cert_validation" {
   lifecycle {
     ignore_changes = ["fqdn"]
   }
+
+  depends_on = [aws_acm_certificate.cert]
 }
