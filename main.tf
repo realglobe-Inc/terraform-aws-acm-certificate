@@ -13,32 +13,28 @@ resource "aws_acm_certificate" "cert" {
 
   lifecycle {
     create_before_destroy = true
-    # SAN に複数のドメインを指定するとランダムな順序で並べ替えてリソースが作成されるため、apply するたびに再作成になる
-    # 一時的な解決策として ignore_changes を使用する
-    # See https://github.com/terraform-providers/terraform-provider-aws/issues/8531
-    ignore_changes = [
-      subject_alternative_names,
-    ]
   }
 }
 
 resource "aws_acm_certificate_validation" "cert" {
   count = var.validate_certificate ? 1 : 0
   certificate_arn         = aws_acm_certificate.cert.arn
-  validation_record_fqdns = aws_route53_record.cert_validation.*.fqdn
+  validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
 }
 
 resource "aws_route53_record" "cert_validation" {
-  count   = var.validate_certificate ? length(var.domain_names) : 0
-  name    = lookup(aws_acm_certificate.cert.domain_validation_options[count.index], "resource_record_name")
-  type    = lookup(aws_acm_certificate.cert.domain_validation_options[count.index], "resource_record_type")
-  records = [lookup(aws_acm_certificate.cert.domain_validation_options[count.index], "resource_record_value")]
-  zone_id = data.aws_route53_zone.zone.zone_id
-  ttl     = 60
-
-  lifecycle {
-    ignore_changes = ["fqdn"]
+  for_each = {
+    for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
   }
 
+  name    = each.value.name
+  records = [each.value.record]
+  type    = each.value.type
+  zone_id = data.aws_route53_zone.zone.zone_id
+  ttl     = 60
   depends_on = [aws_acm_certificate.cert]
 }
