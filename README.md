@@ -8,6 +8,8 @@
 
 Provision an AWS certificate.
 
+Terraform Registry at https://registry.terraform.io/modules/realglobe-Inc/acm-certificate/aws.
+
 ## Usage
 
 ```hcl
@@ -35,3 +37,7 @@ $ terraform init
 $ terraform workspace new development
 $ terraform apply
 ```
+
+## Development
+
+To publish new version in Terraform Registry, just create new release in [releases](https://github.com/realglobe-Inc/terraform-aws-acm-certificate/releases).
