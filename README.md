@@ -13,7 +13,7 @@ Provision an AWS certificate.
 ```hcl
 module "certificate" {
   source = "realglobe-Inc/acm-certificate/aws"
-  version = "2.1.0"
+  version = "3.0.0"
   domain_names = ["example.com", "foo.example.com"]
   route53_zone_name = "example.com."
   acm_cert_tag_name = "example.com"
